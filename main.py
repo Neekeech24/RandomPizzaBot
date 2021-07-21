@@ -1,10 +1,13 @@
+import os
 import random
 import requests
 import telebot
 from telebot import types
+from dotenv import load_dotenv
 
 # Data
-bot = telebot.TeleBot('1906246200:AAHuut8WEMqNeyi22v47joub9IFjDWK4oyo')
+load_dotenv('.env')
+bot = telebot.TeleBot(os.getenv('bot_token'))
 url_dict = {
     'pzz': 'http://pzz.by/api/v1/pizzas',
     'dominos': 'https://backend.dominos.by/api/products/?api_key=B3pl8vGDjMdh&lang=ru&city_id=5'
