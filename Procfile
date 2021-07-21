@@ -1,2 +1,2 @@
-release: python3 main.py
+release: echo released
 web: python3 main.py
