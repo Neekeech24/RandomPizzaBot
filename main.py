@@ -108,7 +108,7 @@ if "HEROKU" in list(os.environ.keys()):
     def webhook():
         bot.remove_webhook()
         bot.set_webhook(
-            url="https://randompizzabot.herokuapp.com/")
+            url="https://randompizzabot.herokuapp.com/bot")
         return "?", 200
 
 
