@@ -1,3 +1,4 @@
+APScheduler==3.7.0
 backcall==0.2.0
 beautifulsoup4==4.9.3
 bs4==0.0.1
@@ -23,9 +24,13 @@ ptyprocess==0.7.0
 Pygments==2.9.0
 pyTelegramBotAPI==3.8.1
 python-dotenv==0.18.0
+pytz==2021.1
 requests==2.26.0
+schedule==1.1.0
+six==1.16.0
 soupsieve==2.2.1
 traitlets==5.0.5
+tzlocal==2.1
 urllib3==1.26.6
 wcwidth==0.2.5
 Werkzeug==2.0.1
