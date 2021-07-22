@@ -31,24 +31,6 @@ pizzas = {
     'dodo': []
 }
 
-# Job setup
-scheduler = BackgroundScheduler()
-
-
-@scheduler.scheduled_job(IntervalTrigger(days=1))
-def job():
-    print('Menu updated')
-    pizzas.update({
-        'dominos': get_dominos(),
-        'dodo': get_dodo(),
-        'tempo': get_tempo(),
-        'pzz': get_pzz()
-    })
-
-
-scheduler.start()
-job()
-
 
 # Chat part
 @bot.message_handler(commands=['start'])
@@ -132,6 +114,24 @@ def get_tempo():
     pizza_div = soup.find_all("div", **search_kwargs)
     pizzas = [item.find("h3").find("span").get_text() for item in pizza_div]
     return pizzas
+
+
+scheduler = BackgroundScheduler()
+
+
+@scheduler.scheduled_job(IntervalTrigger(days=1))
+def job():
+    print('Menu updated')
+    pizzas.update({
+        'dominos': get_dominos(),
+        'dodo': get_dodo(),
+        'tempo': get_tempo(),
+        'pzz': get_pzz()
+    })
+
+
+scheduler.start()
+job()
 
 
 # Webhook setup
