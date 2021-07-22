@@ -124,9 +124,8 @@ if "HEROKU" in list(os.environ.keys()):
 
     @server.route("/")
     def webhook():
-        # bot.remove_webhook()
-        bot.set_webhook(
-            url="https://randompizzabot.herokuapp.com/")
+        bot.remove_webhook()
+        bot.set_webhook(url="https://randompizzabot.herokuapp.com/")
         return "?", 200
 
 
