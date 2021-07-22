@@ -1,7 +1,11 @@
 import os
 import random
+import re
+
 import requests
 import logging
+
+from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from flask import Flask, request
 
@@ -13,12 +17,9 @@ load_dotenv('.env')
 bot = telebot.TeleBot(os.getenv('bot_token'))
 url_dict = {
     'pzz': 'http://pzz.by/api/v1/pizzas',
-    'dominos': 'https://backend.dominos.by/api/products/?api_key=B3pl8vGDjMdh&lang=ru&city_id=5'
-}
-
-history_dict = {
-    'Лисицца': [],
-    'Доминос': []
+    'dominos': 'https://backend.dominos.by/api/products/?api_key=B3pl8vGDjMdh&lang=ru&city_id=5',
+    'tempo': 'https://www.pizzatempo.by/menu/pizza.html',
+    'dodo': 'https://dodopizza.by/minsk#pizzas'
 }
 
 
@@ -27,25 +28,14 @@ history_dict = {
 def start_message(message):
     markup = types.ReplyKeyboardMarkup()
     markup.row_width = 2
-    pzz_btn = types.InlineKeyboardButton(text='Лисицца', callback_data='get_pzz')
-    dominos_btn = types.InlineKeyboardButton(text='Доминос', callback_data='get_dominos')
-    markup.add(pzz_btn, dominos_btn)
+    pzz_btn = types.InlineKeyboardButton(text='Пицца Лисицца')
+    dominos_btn = types.InlineKeyboardButton(text='Домино\'с')
+    tempo_btn = types.InlineKeyboardButton(text='Пицца Темпо')
+    dodo_btn = types.InlineKeyboardButton(text='Додо Пицца')
+    markup.add(pzz_btn, dominos_btn, tempo_btn, dodo_btn)
     reply = "Хочешь питсы, но не можешь определиться? Я помогу. \n" \
             "Откуда заказываем?"
     bot.send_message(message.chat.id, reply, reply_markup=markup)
-
-
-@bot.message_handler(commands=['history'])
-def get_history(message):
-    reply = ""
-    for key in history_dict.keys():
-        if history_dict[key]:
-            reply += f"{key}:\n -"
-            reply += "\n -".join(history_dict[key])
-            reply += "\n"
-        else:
-            reply += f"Пока нет результатов из {key} \n"
-    bot.reply_to(message, reply)
 
 
 @bot.message_handler(commands=['help'])
@@ -58,15 +48,18 @@ def get_help(message):
 
 @bot.message_handler(func=lambda message: True)
 def get_random(message):
-    if message.text == 'Лисицца':
+    if message.text == 'Пицца Лисицца':
         result = get_pzz()
-    elif message.text == 'Доминос':
+    elif message.text == 'Домино\'с':
         result = get_dominos()
+    elif message.text == 'Додо Пицца':
+        result = get_dodo()
+    elif message.text == 'Пицца Темпо':
+        result = get_tempo()
     else:
         result = None
 
     if result:
-        history_dict[message.text].append(result)
         bot.reply_to(message, result)
     else:
         bot.reply_to(message, "Что-то непонятное. Попробуйте /help")
@@ -91,6 +84,31 @@ def get_dominos():
     return random.choice(pizzas)
 
 
+def get_dodo():
+    response = requests.get(url_dict['dodo'])
+    soup = BeautifulSoup(response.text, features='lxml')
+
+    pizza_section = soup.find('section', id='pizzas')
+    search_kwargs = {
+        'data-gtm-id': 'product-title'
+    }
+    pizza_list = pizza_section.find_all("div", **search_kwargs)
+    pizzas = [item.get_text() for item in pizza_list]
+    return random.choice(pizzas)
+
+
+def get_tempo():
+    response = requests.get(url_dict['tempo'])
+    soup = BeautifulSoup(response.text, features='lxml')
+    search_kwargs = {
+        "class": re.compile("item group. novinka_")
+    }
+    pizza_div = soup.find_all("div", **search_kwargs)
+    pizzas = [item.find("h3").find("span").get_text() for item in pizza_div]
+    return random.choice(pizzas)
+
+
+# Webhook setup
 if "HEROKU" in list(os.environ.keys()):
     logger = telebot.logger
     telebot.logger.setLevel(logging.INFO)
