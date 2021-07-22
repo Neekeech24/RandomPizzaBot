@@ -5,22 +5,48 @@ import re
 import requests
 import logging
 
+from apscheduler.triggers.interval import IntervalTrigger
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from flask import Flask, request
+from apscheduler.schedulers.background import BackgroundScheduler
 
 import telebot
 from telebot import types
 
 # Data
 load_dotenv('.env')
-bot = telebot.TeleBot(os.getenv('bot_token'))
+bot = telebot.AsyncTeleBot(os.getenv('bot_token'))
+
 url_dict = {
     'pzz': 'http://pzz.by/api/v1/pizzas',
     'dominos': 'https://backend.dominos.by/api/products/?api_key=B3pl8vGDjMdh&lang=ru&city_id=5',
     'tempo': 'https://www.pizzatempo.by/menu/pizza.html',
     'dodo': 'https://dodopizza.by/minsk#pizzas'
 }
+pizzas = {
+    'pzz': [],
+    'dominos': [],
+    'tempo': [],
+    'dodo': []
+}
+
+# Job setup
+scheduler = BackgroundScheduler()
+
+
+@scheduler.scheduled_job(IntervalTrigger(days=1))
+def job():
+    print('Menu updated')
+    pizzas.update({
+        'dominos': get_dominos(),
+        'dodo': get_dodo(),
+        'tempo': get_tempo(),
+        'pzz': get_pzz()
+    })
+
+
+scheduler.start()
 
 
 # Chat part
@@ -41,21 +67,20 @@ def start_message(message):
 @bot.message_handler(commands=['help'])
 def get_help(message):
     help_message = "Начать использовать бот можно с командой /start.\n" \
-                   "Для получения случайной пиццы нужно выбрать ресторан.\n" \
-                   "Чтоб посмотреть историю результатов используйте /history."
+                   "Для получения случайной пиццы нужно выбрать ресторан.\n"
     bot.reply_to(message, help_message)
 
 
 @bot.message_handler(func=lambda message: True)
 def get_random(message):
     if message.text == 'Пицца Лисицца':
-        result = get_pzz()
+        result = random.choice(pizzas['pzz'])
     elif message.text == 'Домино\'с':
-        result = get_dominos()
+        result = random.choice(pizzas['dominos'])
     elif message.text == 'Додо Пицца':
-        result = get_dodo()
+        result = random.choice(pizzas['dodo'])
     elif message.text == 'Пицца Темпо':
-        result = get_tempo()
+        result = random.choice(pizzas['tempo'])
     else:
         result = None
 
@@ -70,7 +95,7 @@ def get_pzz():
     response = requests.get(url_dict['pzz'])
     data = response.json().get('response').get('data')
     pizzas = [item.get('title') for item in data]
-    return random.choice(pizzas)
+    return pizzas
 
 
 def get_dominos():
@@ -81,7 +106,7 @@ def get_dominos():
         item = data.get(key)
         if item.get('product_category') == 'Pizza':
             pizzas.append(item.get('name'))
-    return random.choice(pizzas)
+    return pizzas
 
 
 def get_dodo():
@@ -94,7 +119,7 @@ def get_dodo():
     }
     pizza_list = pizza_section.find_all("div", **search_kwargs)
     pizzas = [item.get_text() for item in pizza_list]
-    return random.choice(pizzas)
+    return pizzas
 
 
 def get_tempo():
@@ -105,7 +130,7 @@ def get_tempo():
     }
     pizza_div = soup.find_all("div", **search_kwargs)
     pizzas = [item.find("h3").find("span").get_text() for item in pizza_div]
-    return random.choice(pizzas)
+    return pizzas
 
 
 # Webhook setup
