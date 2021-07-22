@@ -35,7 +35,7 @@ pizzas = {
 scheduler = BackgroundScheduler()
 
 
-@scheduler.scheduled_job(IntervalTrigger(days=1))
+@scheduler.scheduled_job(IntervalTrigger(seconds=30))
 def job():
     print('Menu updated')
     pizzas.update({
@@ -73,14 +73,17 @@ def get_help(message):
 
 @bot.message_handler(func=lambda message: True)
 def get_random(message):
-    if message.text == 'Пицца Лисицца':
-        result = random.choice(pizzas['pzz'])
-    elif message.text == 'Домино\'с':
-        result = random.choice(pizzas['dominos'])
-    elif message.text == 'Додо Пицца':
-        result = random.choice(pizzas['dodo'])
-    elif message.text == 'Пицца Темпо':
-        result = random.choice(pizzas['tempo'])
+    try:
+        if message.text == 'Пицца Лисицца':
+            result = random.choice(pizzas['pzz'])
+        elif message.text == 'Домино\'с':
+            result = random.choice(pizzas['dominos'])
+        elif message.text == 'Додо Пицца':
+            result = random.choice(pizzas['dodo'])
+        elif message.text == 'Пицца Темпо':
+            result = random.choice(pizzas['tempo'])
+    except IndexError:
+        result = 'В меню пока ничего нет. Видимо база пуста'
     else:
         result = None
 
