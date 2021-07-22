@@ -116,7 +116,7 @@ if "HEROKU" in list(os.environ.keys()):
     server = Flask(__name__)
 
 
-    @server.route("/bot", methods=['POST', 'GET'])
+    @server.route("/bot", methods=['POST'])
     def getMessage():
         bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
         return "!", 200
@@ -126,7 +126,7 @@ if "HEROKU" in list(os.environ.keys()):
     def webhook():
         bot.remove_webhook()
         bot.set_webhook(
-            url="https://randompizzabot.herokuapp.com/bot")
+            url="https://randompizzabot.herokuapp.com/")
         return "?", 200
 
 
