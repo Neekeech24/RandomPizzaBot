@@ -47,6 +47,7 @@ def job():
 
 
 scheduler.start()
+job()
 
 
 # Chat part
