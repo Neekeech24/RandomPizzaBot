@@ -122,7 +122,7 @@ if "HEROKU" in list(os.environ.keys()):
         return "!", 200
 
 
-    @server.route("/", methods=['POST'])
+    @server.route("/", methods=['GET', 'POST'])
     def webhook():
         bot.remove_webhook()
         bot.set_webhook(
