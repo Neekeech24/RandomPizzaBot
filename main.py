@@ -35,7 +35,7 @@ pizzas = {
 scheduler = BackgroundScheduler()
 
 
-@scheduler.scheduled_job(IntervalTrigger(seconds=30))
+@scheduler.scheduled_job(IntervalTrigger(days=1))
 def job():
     print('Menu updated')
     pizzas.update({
