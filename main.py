@@ -25,10 +25,10 @@ url_dict = {
     'dodo': 'https://dodopizza.by/minsk#pizzas'
 }
 pizzas = {
-    'pzz': [],
-    'dominos': [],
-    'tempo': [],
-    'dodo': []
+    'Лисицца': [],
+    'Доминос': [],
+    'Темпо': [],
+    'Додо': []
 }
 
 
@@ -41,7 +41,8 @@ def start_message(message):
     dominos_btn = types.InlineKeyboardButton(text='Домино\'с')
     tempo_btn = types.InlineKeyboardButton(text='Пицца Темпо')
     dodo_btn = types.InlineKeyboardButton(text='Додо Пицца')
-    markup.add(pzz_btn, dominos_btn, tempo_btn, dodo_btn)
+    full_random = types.InlineKeyboardButton(text='Полностью случайный выбор')
+    markup.add(pzz_btn, dominos_btn, tempo_btn, dodo_btn, full_random)
     reply = "Хочешь питсы, но не можешь определиться? Я помогу. \n" \
             "Откуда заказываем?"
     bot.send_message(message.chat.id, reply, reply_markup=markup)
@@ -57,13 +58,16 @@ def get_help(message):
 @bot.message_handler(func=lambda message: True)
 def get_random(message):
     if message.text == 'Пицца Лисицца':
-        result = random.choice(pizzas['pzz'])
+        result = random.choice(pizzas['Лисицца'])
     elif message.text == 'Домино\'с':
-        result = random.choice(pizzas['dominos'])
+        result = random.choice(pizzas['Доминос'])
     elif message.text == 'Додо Пицца':
-        result = random.choice(pizzas['dodo'])
+        result = random.choice(pizzas['Додо'])
     elif message.text == 'Пицца Темпо':
-        result = random.choice(pizzas['tempo'])
+        result = random.choice(pizzas['Темпо'])
+    elif message.text == 'Полностью случайный выбор':
+        rest = random.choice(list(pizzas.keys()))
+        result = f"{rest}: {random.choice(pizzas[rest])}"
     else:
         result = None
 
@@ -123,10 +127,10 @@ scheduler = BackgroundScheduler()
 def job():
     print('Menu updated')
     pizzas.update({
-        'dominos': get_dominos(),
-        'dodo': get_dodo(),
-        'tempo': get_tempo(),
-        'pzz': get_pzz()
+        'Доминос': get_dominos(),
+        'Додо': get_dodo(),
+        'Темпо': get_tempo(),
+        'Лисицца': get_pzz()
     })
 
 
